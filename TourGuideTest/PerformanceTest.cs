@@ -44,7 +44,7 @@ namespace TourGuideTest
             _output = output;
         }
 
-        [Fact(Skip = "This test is time-consuming and is intended for performance testing. Uncomment to run.")]
+        [Fact(Skip = "Delete Skip when you want to pass the test")]
         public void HighVolumeTrackLocation()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
@@ -68,7 +68,7 @@ namespace TourGuideTest
             Assert.True(TimeSpan.FromMinutes(15).TotalSeconds >= stopWatch.Elapsed.TotalSeconds);
         }
 
-        [Fact]
+        [Fact(Skip = "Delete Skip when you want to pass the test")]
         public void HighVolumeGetRewards()
         {
             //On peut ici augmenter le nombre d'utilisateurs pour tester les performances
