@@ -34,22 +34,23 @@ public class RewardsService : IRewardsService
 
     public void CalculateRewards(User user)
     {
-        count++;
-        List<VisitedLocation> userLocations = user.VisitedLocations;
+        List<VisitedLocation> userLocations = user.VisitedLocations.ToList();
         List<Attraction> attractions = _gpsUtil.GetAttractions();
 
         foreach (var visitedLocation in userLocations)
         {
-            foreach (var attraction in attractions)
+            Parallel.ForEach(attractions, attraction =>
             {
-                if (!user.UserRewards.Any(r => r.Attraction.AttractionName == attraction.AttractionName))
+                // On vérifie directement dans AddUserReward (qui est thread-safe)
+                // Pas besoin du HashSet intermédiaire
+                if (NearAttraction(visitedLocation, attraction))
                 {
-                    if (NearAttraction(visitedLocation, attraction))
-                    {
-                        user.AddUserReward(new UserReward(visitedLocation, attraction, GetRewardPoints(attraction, user)));
-                    }
+                    // GetRewardPoints est lent (1-1000ms) mais peut s'exécuter en parallèle
+                    // car il ne touche pas à l'état partagé
+                    int rewardPoints = GetRewardPoints(attraction, user);
+                    user.AddUserReward(new UserReward(visitedLocation, attraction, rewardPoints));
                 }
-            }
+            });
         }
     }
 

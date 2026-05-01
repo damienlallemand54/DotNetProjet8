@@ -23,9 +23,14 @@ public class User
         EmailAddress = emailAddress;
     }
 
+    private readonly object _locationsLock = new object();
+
     public void AddToVisitedLocations(VisitedLocation visitedLocation)
     {
-        VisitedLocations.Add(visitedLocation);
+        lock (_locationsLock)
+        {
+            VisitedLocations.Add(visitedLocation);
+        }
     }
 
     public void ClearVisitedLocations()
@@ -33,11 +38,16 @@ public class User
         VisitedLocations.Clear();
     }
 
+    private readonly object _rewardsLock = new object();
+
     public void AddUserReward(UserReward userReward)
     {
-        if (!UserRewards.Exists(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+        lock (_rewardsLock)
         {
-            UserRewards.Add(userReward);
+            if (!UserRewards.Exists(r => r.Attraction.AttractionName == userReward.Attraction.AttractionName))
+            {
+                UserRewards.Add(userReward);
+            }
         }
     }
 

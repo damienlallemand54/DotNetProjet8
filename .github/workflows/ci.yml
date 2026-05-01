@@ -1,0 +1,56 @@
+name: TourGuide CI
+
+# Déclenchement à chaque push sur main ou develop,
+# et à chaque Pull Request vers main
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci:
+    name: Compilation → Tests → Build artefact
+    runs-on: ubuntu-latest
+
+    steps:
+      # ÉTAPE 1 : Récupération du code 
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation du SDK .NET 7
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+
+      # ÉTAPE 2 : Compilation
+      - name: Restauration des dépendances
+        run: dotnet restore TourGuide.sln
+
+      - name: Compilation (Release)
+        run: dotnet build TourGuide.sln --configuration Release --no-restore
+
+      # ÉTAPE 3 : Tests 
+      # Les tests de performance (HighVolumeTrackLocation, HighVolumeGetRewards)
+      # sont marqués [Fact(Skip=...)] dans le code pour ne pas bloquer le pipeline.
+      # Ils doivent être lancés manuellement pour valider les performances.
+      - name: Exécution des tests unitaires
+        run: dotnet test TourGuideTest/TourGuideTest.csproj --configuration Release --no-build --verbosity normal
+
+      # ÉTAPE 4 : Build et publication des artefacts
+      - name: Publication de la solution
+        run: |
+          dotnet publish Api/TourGuide.csproj --configuration Release --no-build --output ./publish/TourGuide
+          dotnet publish GpsUtil/GpsUtil.csproj --configuration Release --no-build --output ./publish/GpsUtil
+          dotnet publish RewardCentral/RewardCentral.csproj --configuration Release --no-build --output ./publish/RewardCentral
+          dotnet publish TripPricer/TripPricer.csproj --configuration Release --no-build --output ./publish/TripPricer
+
+      - name: Création de l'archive ZIP
+        run: zip -r TourGuide-dlls.zip ./publish
+
+      - name: Upload de l'artefact téléchargeable
+        uses: actions/upload-artifact@v4
+        with:
+          name: TourGuide-dlls
+          path: TourGuide-dlls.zip
+          retention-days: 90
