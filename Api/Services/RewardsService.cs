@@ -41,12 +41,8 @@ public class RewardsService : IRewardsService
         {
             Parallel.ForEach(attractions, attraction =>
             {
-                // On vérifie directement dans AddUserReward (qui est thread-safe)
-                // Pas besoin du HashSet intermédiaire
                 if (NearAttraction(visitedLocation, attraction))
                 {
-                    // GetRewardPoints est lent (1-1000ms) mais peut s'exécuter en parallèle
-                    // car il ne touche pas à l'état partagé
                     int rewardPoints = GetRewardPoints(attraction, user);
                     user.AddUserReward(new UserReward(visitedLocation, attraction, rewardPoints));
                 }
