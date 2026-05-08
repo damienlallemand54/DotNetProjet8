@@ -136,18 +136,19 @@ public class TourGuideService : ITourGuideService
 
     private static readonly Random random = new Random();
 
+    // Random.Shared est thread-safe nativement en .NET 6+
     private double GenerateRandomLongitude()
     {
-        return new Random().NextDouble() * (180 - (-180)) + (-180);
+        return Random.Shared.NextDouble() * (180 - (-180)) + (-180);
     }
 
     private double GenerateRandomLatitude()
     {
-        return new Random().NextDouble() * (90 - (-90)) + (-90);
+        return Random.Shared.NextDouble() * (90 - (-90)) + (-90);
     }
 
     private DateTime GetRandomTime()
     {
-        return DateTime.UtcNow.AddDays(-new Random().Next(30));
+        return DateTime.UtcNow.AddDays(-Random.Shared.Next(30));
     }
 }
