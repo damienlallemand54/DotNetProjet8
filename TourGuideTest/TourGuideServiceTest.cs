@@ -108,6 +108,7 @@ namespace TourGuideTest
 
             _fixture.TourGuideService.Tracker.StopTracking();
 
+            // On adapte le test, en suivant ce qui est indiqué dans TripPricer (5 providers et non 10)
             Assert.Equal(5, providers.Count);
         }
     }
